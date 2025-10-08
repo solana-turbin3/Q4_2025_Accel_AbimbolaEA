@@ -25,6 +25,9 @@ impl<'info> WhitelistFunction <'info> {
         if !self.whitelist.address.contains(&address) {
             self.realloc_whitelist(true)?;
             self.whitelist.address.push(address);
+
+            // if whitelist doesnt contain this address and 
+            // realloc is_adding is true, then add the address using push
         }
         Ok(())
     }
@@ -36,6 +39,9 @@ impl<'info> WhitelistFunction <'info> {
         if let Some(ppp) = self.whitelist.address.iter().position(|&x| x == address) {
             self.whitelist.address.remove(ppp);
             self.realloc_whitelist(false)?;
+
+            // if there are addresses that the realloc condition
+            // is false for, remove them from waitlist
         }
         Ok(())
     }
