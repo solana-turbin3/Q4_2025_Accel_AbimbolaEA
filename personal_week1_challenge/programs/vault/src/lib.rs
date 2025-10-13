@@ -1,12 +1,12 @@
 #![allow(unexpected_cfgs)]
 #![allow(deprecated)]
-use anchor_lang::{prelude::*, system_program::{Transfer, transfer}};
+use anchor_lang::{prelude::*};
 use anchor_spl::{
     associated_token::AssociatedToken, 
-    token::TokenAccount, 
-    token_2022_extensions::transfer_hook,
-    token_2022::TransferChecked,
-    token_interface::{Mint, TokenInterface}, 
+    // token::TokenAccount, 
+    // token_2022_extensions::transfer_hook,
+    token_2022::{self, TransferChecked},
+    token_interface::{Mint, TokenInterface, TokenAccount}, 
 };
 
 
@@ -16,8 +16,8 @@ declare_id!("4FwU7NpWZnCBHykLbxihDAjUcGACxHTt1erhnEfADvkP");
 pub mod anchor_vault {
     use super::*;
 
-    pub fn initialize(ctx: Context<Initialize>) -> Result<()> {
-        ctx.accounts.initialize(&ctx.bumps)?;
+    pub fn initialize(ctx: Context<Initialize>, amount: u64) -> Result<()> {
+        ctx.accounts.initialize(amount, &ctx.bumps)?;
 
         Ok(())
     }
@@ -58,8 +58,8 @@ pub struct Initialize<'info> {
         payer = user,
         mint::decimals = 9,
         mint::authority = user,
-        extensions::transfer_hook::authority = owner
-        extensions::transfer_hook::program_id = hook_program_id.key()
+        // extensions::transfer_hook::authority = owner,
+        // extensions::transfer_hook::program_id = hook_program_id.key()
     )]
     pub mint: InterfaceAccount<'info, Mint>,
 
@@ -73,17 +73,17 @@ pub struct Initialize<'info> {
     pub vault_ata: InterfaceAccount<'info, TokenAccount>,
 
     pub token_program: Interface<'info, TokenInterface>,
-    pub associated_token_program: Program<'info, AssociatedToken>
+    pub associated_token_program: Program<'info, AssociatedToken>,
     pub system_program: Program<'info, System>,
 }
 
 impl<'info> Initialize<'info> {
-    pub fn initialize(&mut self, bumps: &InitializeBumps) -> Result<()> {
+    pub fn initialize(&mut self, amount: u64, bumps: &InitializeBumps) -> Result<()> {
         // Get the amount of lamports needed to make the vault rent exempt
-        let rent_exempt = Rent::get()?.minimum_balance(self.vault_ata.to_account_info().data_len());
+        // let rent_exempt = Rent::get()?.minimum_balance(self.vault_ata.to_account_info().data_len());
 
         // Transfer the rent-exempt amount from the user to the vault
-        let cpi_program = self.system_program.to_account_info();
+        let cpi_program = self.token_program.to_account_info();
         let cpi_accounts = TransferChecked {
             from: self.user.to_account_info(),
             mint: self.mint.to_account_info(),
@@ -93,9 +93,9 @@ impl<'info> Initialize<'info> {
 
         let cpi_ctx = CpiContext::new(cpi_program, cpi_accounts);
 
-        TransferChecked(cpi_ctx, rent_exempt)?;
+        token_2022::transfer_checked(cpi_ctx, amount, 9)?;
 
-        self.vault_state.vault_bump = bumps.vault_ata;
+        self.vault_state.vault_bump = bumps.vault_state;
         self.vault_state.state_bump = bumps.vault_state;
 
         Ok(())
@@ -109,17 +109,16 @@ pub struct Payment<'info> {
     
       #[account(
         mut,
-        payer = user,
         mint::decimals = 9,
         mint::authority = user,
-        extensions::transfer_hook::authority = owner
-        extensions::transfer_hook::program_id = hook_program_id.key()
+        // extensions::transfer_hook::authority = user,
+        // extensions::transfer_hook::program_id = hook_program_id.key()
     )]
     pub mint: InterfaceAccount<'info, Mint>,
 
     #[account(
         mut,
-        payer = user,
+        // payer = user,
         associated_token::mint = mint,
         associated_token::authority = user,
         associated_token::token_program = token_program
@@ -132,14 +131,14 @@ pub struct Payment<'info> {
     )]
     pub vault_state: Account<'info, VaultState>,
     pub token_program: Interface<'info, TokenInterface>,
-    pub associated_token_program: Program<'info, AssociatedToken>
+    pub associated_token_program: Program<'info, AssociatedToken>,
     pub system_program: Program<'info, System>,
 }
 
 impl<'info> Payment<'info> {
     pub fn deposit(&mut self, amount: u64) -> Result<()> {
 
-        let cpi_program = self.associated_token_program.to_account_info();
+        let cpi_program = self.token_program.to_account_info();
 
         let cpi_accounts = TransferChecked {
             from: self.user.to_account_info(),
@@ -150,13 +149,13 @@ impl<'info> Payment<'info> {
 
         let cpi_ctx = CpiContext::new(cpi_program, cpi_accounts);
 
-        TransferChecked(cpi_ctx, amount)?;
+        token_2022::transfer_checked(cpi_ctx, amount, 9)?;
 
         Ok(())
     }
 
     pub fn withdraw(&mut self, amount: u64) -> Result<()> {
-        let cpi_program = self.associated_token_program.to_account_info();
+        let cpi_program = self.token_program.to_account_info();
 
         let cpi_accounts = TransferChecked {
             from: self.vault_ata.to_account_info(),
@@ -175,7 +174,7 @@ impl<'info> Payment<'info> {
 
         let cpi_ctx = CpiContext::new_with_signer(cpi_program, cpi_accounts, signer_seeds);
 
-        TransferChecked(cpi_ctx, amount)?;
+        token_2022::transfer_checked(cpi_ctx, amount, 9)?;
 
         Ok(())
     }
@@ -188,17 +187,17 @@ pub struct Close<'info> {
   
     #[account(
         mut,
-        payer = user,
+        // payer = user,
         mint::decimals = 9,
         mint::authority = user,
-        extensions::transfer_hook::authority = owner
-        extensions::transfer_hook::program_id = hook_program_id.key()
+        // extensions::transfer_hook::authority = owner,
+        // extensions::transfer_hook::program_id = hook_program_id.key()
     )]
     pub mint: InterfaceAccount<'info, Mint>,
 
    #[account(
         mut,
-        payer = user,
+        // payer = user,
         associated_token::mint = mint,
         associated_token::authority = user,
         associated_token::token_program = token_program
@@ -213,7 +212,7 @@ pub struct Close<'info> {
     )]
     pub vault_state: Account<'info, VaultState>,
     pub token_program: Interface<'info, TokenInterface>,
-    pub associated_token_program: Program<'info, AssociatedToken>
+    pub associated_token_program: Program<'info, AssociatedToken>,
     pub system_program: Program<'info, System>,
 }
 
@@ -228,6 +227,7 @@ impl<'info> Close<'info> {
             authority: self.user.to_account_info(),
         };
 
+        let amount = self.vault_ata.get_lamports();
         let seeds = &[
             b"vault",
             self.vault_state.to_account_info().key.as_ref(),
@@ -238,7 +238,7 @@ impl<'info> Close<'info> {
 
         let cpi_ctx = CpiContext::new_with_signer(cpi_program, cpi_accounts, signer_seeds);
 
-        TransferChecked(cpi_ctx, self.vault_ata.lamports())?;
+        token_2022::transfer_checked(cpi_ctx, amount, 9)?;
 
         Ok(())
     }
