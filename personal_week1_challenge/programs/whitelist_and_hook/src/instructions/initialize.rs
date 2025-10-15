@@ -1,5 +1,5 @@
 use anchor_lang::prelude::*;
-use anchor_spl::token_2022_extensions::transfer_hook;
+// use anchor_spl::token_2022_extensions::transfer_hook;
 
 use crate::Whitelist;
 
@@ -14,7 +14,7 @@ pub struct Initialize <'info> {
         init,
         payer = user,
         space = 8 + Whitelist::INIT_SPACE,
-        seeds = [b"whitelist"]
+        seeds = [b"whitelist", user.key().as_ref()],
         bump,
     )]
     pub whitelist: Account<'info, Whitelist>,
