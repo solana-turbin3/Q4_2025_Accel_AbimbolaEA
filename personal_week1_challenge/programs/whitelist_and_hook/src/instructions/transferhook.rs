@@ -1,54 +1,65 @@
 use anchor_lang::prelude::*;
-use anchor_spl::token_interface::{Mint, TokenAccount};
+use anchor_spl::{
+    token_2022::spl_token_2022::{
+        extension::{
+            transfer_hook::TransferHookAccount, BaseStateWithExtensionsMut,
+            PodStateWithExtensionsMut,
+        },
+        pod::PodAccount,
+    },
+    token_interface::{Mint, TokenAccount},
+};
 
+use crate::error::WhitelistError;
 use crate::Whitelist;
-
+use vault::ID as vault_ID;
 
 #[derive(Accounts)]
 pub struct TransferHook<'info> {
     #[account(
         token::mint = mint,
-        token::authority = user
+        token::authority = owner
     )]
     pub source_token: InterfaceAccount<'info, TokenAccount>,
-
-    /// The wallet/authority of the source token account (not a signer in transfer-hook callbacks)
-    pub user: UncheckedAccount<'info>,
-
     pub mint: InterfaceAccount<'info, Mint>,
 
     #[account(token::mint = mint)]
     pub destination_token: InterfaceAccount<'info, TokenAccount>,
 
     /// CHECK: PDA of the vault program
-    // #[account()]
     pub owner: UncheckedAccount<'info>,
 
     /// CHECK: ExtraAccountMetaList Account
     pub extra_account_meta_list: UncheckedAccount<'info>,
 
-    #[account(seeds = [b"whitelist"], bump)]
+    #[account(
+        seeds = [b"whitelist"], 
+        bump = whitelist.bump,
+        seeds::program = vault_ID
+    )]
     pub whitelist: Account<'info, Whitelist>,
 }
 
-
 impl<'info> TransferHook<'info> {
-    pub fn transfer_hook(&mut self) -> Result<()> {
-        // these are the instructions that must be met for the transaction to happen
-        // We enforce that the token owner is present in the Whitelist.list
+    pub fn transfer_hook(
+        &mut self,
+        // amount: u64
+    ) -> Result<()> {
+        self.check_is_transferring()?;
 
-        // Determine the owner pubkey to check. The transfer-hook instruction gives us
-        // the source token account and its authority; we'll use `source_token`'s owner
-        // (authority) as the user who must be whitelisted.
+        if self.whitelist.list != self.source_token.key() {
+            return err!(WhitelistError::UserNotWhitelisted);
+        }
+        Ok(())
+    }
 
-        // The authority (wallet) that is performing the transfer should be provided
-        // as the `user` account. Use that pubkey to check membership in the whitelist.
-        // The token program calls the hook; the authority may not be a signer here. Read
-        // the owner directly from the source token account data.
-        let user_pk: Pubkey = self.source_token.owner;
-
-        if !self.whitelist.list.contains(&user_pk) {
-            return err!(crate::error::WhitelistError::UserNotWhitelisted);
+    fn check_is_transferring(&mut self) -> Result<()> {
+        let source_token_info = self.source_token.to_account_info();
+        let mut account_data_ref = source_token_info.try_borrow_mut_data()?;
+        let mut account = PodStateWithExtensionsMut::<PodAccount>::unpack(*account_data_ref)?;
+        let account_extension = account.get_extension_mut::<TransferHookAccount>()?;
+        if !bool::from(account_extension.transferring) {
+            panic!("TransferHook: Not transferring");
         }
 
         Ok(())

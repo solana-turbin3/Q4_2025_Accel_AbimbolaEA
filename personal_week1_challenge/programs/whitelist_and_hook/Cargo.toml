@@ -21,8 +21,8 @@ custom-panic = []
 
 
 [dependencies]
-anchor-lang = "0.31.1"
-anchor-spl = "0.31.1"
+anchor-lang = {version = "0.32.1", features = ["init-if-needed"]}
+anchor-spl = "0.32.1"
 spl-discriminator = "0.5.1"
 spl-tlv-account-resolution = "0.11.1"
 spl-transfer-hook-interface = "2.0.0"
@@ -31,3 +31,7 @@ vault = { path = "../vault", features = ["cpi"] }
 
 [lints.rust]
 unexpected_cfgs = { level = "warn", check-cfg = ['cfg(target_os, values("solana"))'] }
+
+[dev-dependencies]
+litesvm = "0.8.1"
+solana-sdk = "3.0.0"

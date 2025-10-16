@@ -1,14 +1,13 @@
 #![allow(unexpected_cfgs)]
 #![allow(deprecated)]
-use anchor_lang::{prelude::*};
+use anchor_lang::prelude::*;
 use anchor_spl::{
-    associated_token::AssociatedToken, 
-    // token::TokenAccount, 
+    associated_token::AssociatedToken,
+    // token::TokenAccount,
     // token_2022_extensions::transfer_hook,
     token_2022::{self, TransferChecked},
-    token_interface::{Mint, TokenInterface, TokenAccount}, 
+    token_interface::{Mint, TokenAccount, TokenInterface},
 };
-
 
 declare_id!("4FwU7NpWZnCBHykLbxihDAjUcGACxHTt1erhnEfADvkP");
 
@@ -102,15 +101,15 @@ impl<'info> Initialize<'info> {
         self.vault_state.state_bump = bumps.vault_state;
 
         Ok(())
-    }  
+    }
 }
 
 #[derive(Accounts)]
 pub struct Payment<'info> {
     #[account(mut)]
     pub user: Signer<'info>,
-    
-      #[account(
+
+    #[account(
         mut,
         mint::decimals = 9,
         mint::authority = user,
@@ -140,7 +139,6 @@ pub struct Payment<'info> {
 
 impl<'info> Payment<'info> {
     pub fn deposit(&mut self, amount: u64) -> Result<()> {
-
         let cpi_program = self.token_program.to_account_info();
 
         let cpi_accounts = TransferChecked {
@@ -187,7 +185,7 @@ impl<'info> Payment<'info> {
 pub struct Close<'info> {
     #[account(mut)]
     pub user: Signer<'info>,
-  
+
     #[account(
         mut,
         // payer = user,
@@ -198,7 +196,7 @@ pub struct Close<'info> {
     )]
     pub mint: InterfaceAccount<'info, Mint>,
 
-   #[account(
+    #[account(
         mut,
         // payer = user,
         associated_token::mint = mint,
