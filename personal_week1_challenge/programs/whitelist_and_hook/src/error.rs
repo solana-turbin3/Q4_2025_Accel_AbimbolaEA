@@ -6,4 +6,6 @@ pub enum WhitelistError {
     AlreadyWhitelisted,
     #[msg("The user is not whitelisted")]
     UserNotWhitelisted,
+    #[msg("Failed to initialize ExtraAccountMeta list")]
+    ExtraAccountMetaInitFailed,
 }

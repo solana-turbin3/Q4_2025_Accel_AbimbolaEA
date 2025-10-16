@@ -38,19 +38,18 @@ pub struct InitializeExtraAccountMetaList <'info> {
 // }
 
 impl<'info> InitializeExtraAccountMetaList<'info> {
-    pub fn initialize_extra_account_meta_list() -> Result<Vec<ExtraAccountMeta>> {
-        Ok(
-            vec![
-                ExtraAccountMeta::new_with_seeds(
-                    &[
-                        Seed::Literal {
-                            bytes: "whitelist".as_bytes().to_vec(),
-                        },
-                    ],
-                    false,
-                    true
-                )?
-            ]
-        )
+    pub fn initialize_extra_account_meta_list(&mut self) -> Result<()> {
+        match ExtraAccountMeta::new_with_seeds(
+            &[
+                Seed::Literal {
+                    bytes: "whitelist".as_bytes().to_vec(),
+                },
+            ],
+            false,
+            true,
+        ) {
+            Ok(_meta) => Ok(()),
+            Err(_) => Err(anchor_lang::error::Error::from(anchor_lang::prelude::ProgramError::Custom(0))),
+        }
     }
 }

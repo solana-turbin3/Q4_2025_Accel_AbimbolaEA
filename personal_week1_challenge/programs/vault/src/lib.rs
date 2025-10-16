@@ -58,8 +58,8 @@ pub struct Initialize<'info> {
         payer = user,
         mint::decimals = 9,
         mint::authority = user,
-        // extensions::transfer_hook::authority = owner,
-        // extensions::transfer_hook::program_id = hook_program_id.key()
+        // extensions::transfer_hook::authority = user,
+        extensions::transfer_hook::program_id = hook_program_id.key()
     )]
     pub mint: InterfaceAccount<'info, Mint>,
 
@@ -75,6 +75,9 @@ pub struct Initialize<'info> {
     pub token_program: Interface<'info, TokenInterface>,
     pub associated_token_program: Program<'info, AssociatedToken>,
     pub system_program: Program<'info, System>,
+
+    /// CHECK: Program id of the transfer hook
+    pub hook_program_id: UncheckedAccount<'info>,
 }
 
 impl<'info> Initialize<'info> {

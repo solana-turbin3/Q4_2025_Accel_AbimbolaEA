@@ -21,9 +21,12 @@ custom-panic = []
 
 
 [dependencies]
-anchor-lang = "0.32.1"
-anchor-spl = "0.32.1"
+anchor-lang = "0.31.1"
+anchor-spl = "0.31.1"
+spl-discriminator = "0.5.1"
 spl-tlv-account-resolution = "0.11.1"
+spl-transfer-hook-interface = "2.0.0"
+vault = { path = "../vault", features = ["cpi"] }
 
 
 [lints.rust]
