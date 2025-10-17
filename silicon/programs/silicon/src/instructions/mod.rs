@@ -1,9 +1,9 @@
+pub mod initialize;
 pub mod init_extra_account_metas;
-// pub mod initialize;
-pub mod transferhook;
+pub mod hook;
 pub mod whitelistoperations;
 
+pub use initialize::*;
 pub use init_extra_account_metas::*;
-// pub use initialize::*;
-pub use transferhook::*;
+pub use hook::*;
 pub use whitelistoperations::*;

@@ -1,12 +1,12 @@
 [package]
-name = "whitelist_and_hook"
+name = "silicon"
 version = "0.1.0"
 description = "Created with Anchor"
 edition = "2021"
 
 [lib]
 crate-type = ["cdylib", "lib"]
-name = "whitelist_and_hook"
+name = "silicon"
 
 [features]
 default = []
@@ -31,7 +31,3 @@ vault = { path = "../vault", features = ["cpi"] }
 
 [lints.rust]
 unexpected_cfgs = { level = "warn", check-cfg = ['cfg(target_os, values("solana"))'] }
-
-[dev-dependencies]
-litesvm = "0.8.1"
-solana-sdk = "3.0.0"

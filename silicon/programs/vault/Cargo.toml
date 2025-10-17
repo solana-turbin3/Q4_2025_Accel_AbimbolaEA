@@ -1,12 +1,12 @@
 [package]
-name = "whitelist_and_hook"
+name = "vault"
 version = "0.1.0"
 description = "Created with Anchor"
 edition = "2021"
 
 [lib]
 crate-type = ["cdylib", "lib"]
-name = "whitelist_and_hook"
+name = "vault"
 
 [features]
 default = []
@@ -21,17 +21,9 @@ custom-panic = []
 
 
 [dependencies]
-anchor-lang = {version = "0.32.1", features = ["init-if-needed"]}
+anchor-lang = "0.32.1"
 anchor-spl = "0.32.1"
-spl-discriminator = "0.5.1"
-spl-tlv-account-resolution = "0.11.1"
-spl-transfer-hook-interface = "2.0.0"
-vault = { path = "../vault", features = ["cpi"] }
 
 
 [lints.rust]
 unexpected_cfgs = { level = "warn", check-cfg = ['cfg(target_os, values("solana"))'] }
-
-[dev-dependencies]
-litesvm = "0.8.1"
-solana-sdk = "3.0.0"
