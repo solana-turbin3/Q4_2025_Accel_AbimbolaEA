@@ -1,8 +1,5 @@
+use crate::{error::WhitelistError, Whitelist};
 use anchor_lang::prelude::*;
-use crate::{
-    Whitelist,
-    error::WhitelistError,
-};
 #[derive(Accounts)]
 pub struct WhitelistOperations<'info> {
     #[account(mut)]
@@ -19,8 +16,8 @@ pub struct WhitelistOperations<'info> {
     pub system_program: Program<'info, System>,
 }
 
-impl<'info> WhitelistOperations <'info> {
-    pub fn add_to_whitelist (
+impl<'info> WhitelistOperations<'info> {
+    pub fn add_to_whitelist(
         &mut self,
         user: Pubkey,
         bumps: &WhitelistOperationsBumps,
@@ -28,15 +25,16 @@ impl<'info> WhitelistOperations <'info> {
         if self.whitelist.address == user {
             return err!(WhitelistError::AlreadyWhitelisted);
         }
-        self.whitelist.set_inner(Whitelist { address: user, bump: bumps.whitelist });
+        self.whitelist.set_inner(Whitelist {
+            address: user,
+            bump: bumps.whitelist,
+        });
         Ok(())
     }
 
-    pub fn remove_from_whitelist(
-        &mut self,
-    ) -> Result<()> {
+    pub fn remove_from_whitelist(&mut self) -> Result<()> {
         if self.whitelist.address != user {
-            return err!(WhitelistError::UserNotWhitelisted)
+            return err!(WhitelistError::UserNotWhitelisted);
         }
         self.whitelist.close(self.user.to_account_info())?;
         Ok(())

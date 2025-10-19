@@ -1,12 +1,15 @@
 use anchor_lang::prelude::*;
 use anchor_spl::{
-    associated_token::AssociatedToken, token_interface::{transfer_checked_with_fee, Mint, TokenAccount, TokenInterface, TransferCheckedWithFee}
+    associated_token::AssociatedToken,
+    token_interface::{
+        transfer_checked_with_fee, Mint, TokenAccount, TokenInterface, TransferCheckedWithFee,
+    },
 };
 
 use crate::Vault;
 
 #[derive(Accounts)]
-pub struct Payment <'info>{
+pub struct Payment<'info> {
     #[account(mut)]
     pub user: Signer<'info>,
 
@@ -35,14 +38,11 @@ pub struct Payment <'info>{
     pub vault_state: Account<'info, Vault>,
     pub token_program: Interface<'info, TokenInterface>,
     pub associated_token_program: Program<'info, AssociatedToken>,
-    pub system_program: Program<'info, System>
+    pub system_program: Program<'info, System>,
 }
 
-impl<'info> Payment <'info> {
-    pub fn deposit(
-        &mut self,
-        amount: u64,
-    ) -> Result<()> {
+impl<'info> Payment<'info> {
+    pub fn deposit(&mut self, amount: u64) -> Result<()> {
         let cpi_program = self.token_program.to_account_info();
 
         let cpi_accounts = TransferCheckedWithFee {
@@ -53,17 +53,14 @@ impl<'info> Payment <'info> {
             authority: self.user.to_account_info(),
         };
 
-        let fees = amount * 1/100;
+        let fees = amount * 1 / 100;
         let cpi_ctx = CpiContext::new(cpi_program, cpi_accounts);
         transfer_checked_with_fee(cpi_ctx, amount, 9, fees)?;
 
         Ok(())
     }
 
-    pub fn withdraw(
-        &mut self,
-        amount: u64,
-    ) -> Result<()> {
+    pub fn withdraw(&mut self, amount: u64) -> Result<()> {
         let cpi_program = self.token_program.to_account_info();
 
         let cpi_accounts = TransferCheckedWithFee {
@@ -74,7 +71,7 @@ impl<'info> Payment <'info> {
             authority: self.vault.to_account_info(),
         };
 
-        let fees = amount * 1/100;
+        let fees = amount * 1 / 100;
         let cpi_ctx = CpiContext::new(cpi_program, cpi_accounts);
         transfer_checked_with_fee(cpi_ctx, amount, 9, fees)?;
 
