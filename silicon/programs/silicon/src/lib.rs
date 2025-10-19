@@ -4,9 +4,7 @@ pub mod instructions;
 pub mod state;
 
 use anchor_lang::prelude::*;
-use spl_transfer_hook_interface::instruction::{
-    ExecuteInstruction,
-};
+use spl_transfer_hook_interface::instruction::ExecuteInstruction;
 
 pub use constants::*;
 pub use instructions::*;
@@ -33,7 +31,10 @@ pub mod silicon {
     pub fn extra_account_metas(ctx: Context<InitializeExtraAccountMetaList>) -> Result<()> {
         let extra_account_metas = InitializeExtraAccountMetaList::exta_account_metas()?;
         msg!("Extra account Metas Length: {:?}", extra_account_metas);
-        msg!("Extra account Metas Length: {:?}", extra_account_metas.len());
+        msg!(
+            "Extra account Metas Length: {:?}",
+            extra_account_metas.len()
+        );
 
         Ok(())
     }

@@ -2,20 +2,18 @@ use anchor_lang::prelude::*;
 use anchor_spl::{
     token_2022::spl_token_2022::{
         extension::{
-            transfer_hook::TransferHookAccount, BaseStateWithExtensionsMut, PodStateWithExtensionsMut,
+            transfer_hook::TransferHookAccount, BaseStateWithExtensionsMut,
+            PodStateWithExtensionsMut,
         },
         pod::PodAccount,
     },
-    token_interface::{Mint, TokenAccount}
+    token_interface::{Mint, TokenAccount},
 };
 
-use crate::{
-    error::WhitelistError,
-    Whitelist
-};
+use crate::{error::WhitelistError, Whitelist};
 
 #[derive(Accounts)]
-pub struct TransferHook <'info> {
+pub struct TransferHook<'info> {
     #[account(
         token::mint = mint,
         token::authority = owner,
@@ -27,7 +25,7 @@ pub struct TransferHook <'info> {
     pub destination_token: InterfaceAccount<'info, TokenAccount>,
 
     /// CHECK: The PDA of the VaultProgram
-    pub owner: UncheckedAccount<'info>, 
+    pub owner: UncheckedAccount<'info>,
 
     /// CHECK: ExtraAccountMetaListAccount
     pub extra_account_meta_list: UncheckedAccount<'info>,
@@ -40,10 +38,8 @@ pub struct TransferHook <'info> {
     pub whitelist: Account<'info, Whitelist>,
 }
 
-impl<'info> TransferHook <'info> {
-    pub fn hook(
-        &mut self,
-    ) -> Result<()>{
+impl<'info> TransferHook<'info> {
+    pub fn hook(&mut self) -> Result<()> {
         self.check_is_transferring()?;
 
         if self.whitelist.address != self.soutce_token.key() {

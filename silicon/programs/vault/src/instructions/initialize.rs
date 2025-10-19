@@ -1,31 +1,28 @@
 use anchor_lang::prelude::*;
 use anchor_lang::system_program::{create_account, CreateAccount};
-use anchor_spl::token_interface::spl_pod::optional_keys::{OptionalNonZeroPubkey};
+use anchor_spl::token_2022::{
+    initialize_mint2,
+    spl_token_2022::{
+        extension::{
+            transfer_fee::TransferFeeConfig, BaseStateWithExtensions, StateWithExtensions,
+        },
+        pod::PodMint,
+        state::Mint as MintState,
+    },
+    InitializeMint2,
+};
+use anchor_spl::token_interface::spl_pod::optional_keys::OptionalNonZeroPubkey;
 use anchor_spl::token_interface::{transfer_fee_initialize, TokenAccount};
 use anchor_spl::{
-    associated_token::AssociatedToken, token_2022::spl_token_2022::extension::ExtensionType, 
-    token_interface:: {Mint, TokenInterface, TransferFeeInitialize}
-};
-use anchor_spl::{
-    token_2022::{
-        initialize_mint2,
-        spl_token_2022::{
-            extension::{
-                transfer_fee::TransferFeeConfig, BaseStateWithExtensions,
-                StateWithExtensions,
-            },
-            pod::PodMint,
-            state::Mint as MintState,
-        },
-        InitializeMint2,
-    },
+    associated_token::AssociatedToken,
+    token_2022::spl_token_2022::extension::ExtensionType,
+    token_interface::{Mint, TokenInterface, TransferFeeInitialize},
 };
 
 use crate::Vault;
 
-
 #[derive(Accounts)]
-pub struct Initialize <'info>{
+pub struct Initialize<'info> {
     #[account(mut)]
     pub user: Signer<'info>,
 
@@ -58,26 +55,24 @@ pub struct Initialize <'info>{
     pub vault: Account<'info, Vault>,
     pub token_program: Interface<'info, TokenInterface>,
     pub associated_token_program: Program<'info, AssociatedToken>,
-    pub system_program: Program<'info, System>
+    pub system_program: Program<'info, System>,
 }
 
 impl<'info> Initialize<'info> {
-
-    pub fn initialize(
-        &mut self,
-        bumps: &InitializeBumps
-    ) -> Result<()>{
-        self.vault.set_inner(Vault{
+    pub fn initialize(&mut self, bumps: &InitializeBumps) -> Result<()> {
+        self.vault.set_inner(Vault {
             bump: self.bumps.vault,
             admin: self.user.key(),
         })
     }
-    pub fn transfer_fee_ix (
+    pub fn transfer_fee_ix(
         &mut self,
         transfer_fee_basis_points: u16,
-        maximum_fee: u64 
+        maximum_fee: u64,
     ) -> Result<()> {
-        let mint_size = ExtensionType::try_calculate_account_len::<PodMint>(&[ExtensionType::TransferFeeConfig])?;
+        let mint_size = ExtensionType::try_calculate_account_len::<PodMint>(&[
+            ExtensionType::TransferFeeConfig,
+        ])?;
         let lamports = (Rent::get()?).minimum_balance(mint_size);
 
         create_account(
@@ -114,7 +109,7 @@ impl<'info> Initialize<'info> {
                     mint: self.mint.to_account_info(),
                 },
             ),
-            2, //decimals
+            2,                //decimals
             &self.user.key(), //mint authority
             Some(&self.admin.key()),
         )?;
