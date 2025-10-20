@@ -4,6 +4,7 @@ pub mod instructions;
 pub mod state;
 
 use anchor_lang::prelude::*;
+use solana_gpt_oracle;
 use spl_transfer_hook_interface::instruction::ExecuteInstruction;
 
 pub use constants::*;
@@ -16,8 +17,19 @@ declare_id!("8TjYjuCkF7NCCcWCjFsFfrdysDXUsLXXAfK37unQJJE3");
 pub mod silicon {
     use super::*;
 
-    pub fn initialize(ctx: Context<Initialize>) -> Result<()> {
-        initialize::handler(ctx)
+    pub fn initialize_agent(ctx: Context<InitializeAgent>) -> Result<()> {
+        ctx.accounts.initialize_agent()
+    }
+
+    pub fn interact_agent(ctx: Context<InteractAgent>, text: String) -> Result<()> {
+        ctx.accounts.interact_agent(text)
+    }
+
+    pub fn __client_accounts_callback_from_agent(
+        ctx: Context<CallbackFromAgent>,
+        response: String,
+    ) -> Result<()> {
+        ctx.accounts.callback_from_agent(response)
     }
 
     pub fn add_to_whitelist(ctx: Context<WhitelistOperations>, user: Pubkey) -> Result<()> {

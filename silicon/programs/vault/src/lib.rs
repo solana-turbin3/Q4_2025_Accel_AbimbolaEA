@@ -16,7 +16,11 @@ pub mod vault {
     use super::*;
 
     pub fn initialize(ctx: Context<Initialize>) -> Result<()> {
-        ctx.accounts.initialize()
+        ctx.accounts.initialize(&ctx.bumps)
+    }
+
+    pub fn check_mint_data(ctx: Context<Initialize>) -> Result<()> {
+        ctx.accounts.check_mint_data()
     }
 
     pub fn deposit(ctx: Context<Payment>, amount: u64) -> Result<()> {

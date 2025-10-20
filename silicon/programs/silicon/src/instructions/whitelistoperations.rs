@@ -7,7 +7,7 @@ pub struct WhitelistOperations<'info> {
 
     #[account(
         init_if_needed,
-        payer = user, 
+        payer = user,
         space = Whitelist::DISCRIMINATOR.len() + Whitelist::INIT_SPACE,
         seeds = [b"whitelist", user.key().as_ref()],
         bump,
@@ -22,18 +22,19 @@ impl<'info> WhitelistOperations<'info> {
         user: Pubkey,
         bumps: &WhitelistOperationsBumps,
     ) -> Result<()> {
-        if self.whitelist.address == user {
+        if self.whitelist.is_whitelisted == true {
             return err!(WhitelistError::AlreadyWhitelisted);
         }
         self.whitelist.set_inner(Whitelist {
             address: user,
+            is_whitelisted: true,
             bump: bumps.whitelist,
         });
         Ok(())
     }
 
     pub fn remove_from_whitelist(&mut self) -> Result<()> {
-        if self.whitelist.address != user {
+        if self.whitelist.is_whitelisted == false {
             return err!(WhitelistError::UserNotWhitelisted);
         }
         self.whitelist.close(self.user.to_account_info())?;
