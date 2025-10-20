@@ -19,7 +19,8 @@ use anchor_spl::{
     token_interface::{Mint, TokenInterface, TransferFeeInitialize},
 };
 
-use crate::Vault;
+use crate::state::Vault;
+use crate::constants::SILICON_ID;
 
 #[derive(Accounts)]
 pub struct Initialize<'info> {
@@ -29,10 +30,10 @@ pub struct Initialize<'info> {
     pub admin: Signer<'info>,
     #[account(
         init,
-        payer = user, 
+        payer = user,
         mint::decimals = 9,
         mint::authority = user,
-        extensions::transfer_hook::program_id = hook_program_id.key()
+        extensions::transfer_hook::program_id = SILICON_ID.key()
     )]
     pub mint: InterfaceAccount<'info, Mint>,
 
@@ -43,7 +44,7 @@ pub struct Initialize<'info> {
         associated_token::authority = user,
         associated_token::token_program = associated_token_program
     )]
-    pub vault: InterfaceAccount<'info, TokenAccount>,
+    pub vault_ata: InterfaceAccount<'info, TokenAccount>,
 
     #[account(
         init,
@@ -61,9 +62,11 @@ pub struct Initialize<'info> {
 impl<'info> Initialize<'info> {
     pub fn initialize(&mut self, bumps: &InitializeBumps) -> Result<()> {
         self.vault.set_inner(Vault {
-            bump: self.bumps.vault,
+            bump: bumps.vault,
             admin: self.user.key(),
-        })
+        });
+
+        Ok(())
     }
     pub fn transfer_fee_ix(
         &mut self,
@@ -80,7 +83,7 @@ impl<'info> Initialize<'info> {
                 self.associated_token_program.to_account_info(),
                 CreateAccount {
                     from: self.user.to_account_info(),
-                    to: self.admin.to_account_info,
+                    to: self.admin.to_account_info(),
                 },
             ),
             lamports,
@@ -113,7 +116,7 @@ impl<'info> Initialize<'info> {
             &self.user.key(), //mint authority
             Some(&self.admin.key()),
         )?;
-        check_mint_data()?;
+        self.check_mint_data()?;
         Ok(())
     }
 
@@ -129,7 +132,7 @@ impl<'info> Initialize<'info> {
         );
 
         assert_eq!(
-            extension_data.withdraw_withdraw_authority,
+            extension_data.withdraw_withheld_authority,
             OptionalNonZeroPubkey::try_from(Some(self.user.key()))?
         );
 
