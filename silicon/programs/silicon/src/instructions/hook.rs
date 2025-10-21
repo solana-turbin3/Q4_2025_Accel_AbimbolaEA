@@ -10,7 +10,8 @@ use anchor_spl::{
     token_interface::{Mint, TokenAccount},
 };
 
-use crate::{error::WhitelistError, Whitelist};
+use crate::error::WhitelistError;
+use crate::Whitelist;
 
 #[derive(Accounts)]
 pub struct TransferHook<'info> {

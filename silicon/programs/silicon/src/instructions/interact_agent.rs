@@ -1,5 +1,4 @@
 use anchor_lang::prelude::*;
-use anchor_spl::associated_token::create;
 use solana_gpt_oracle::{
     self,
     solana_gpt_oracle::{create_llm_context, interact_with_llm},

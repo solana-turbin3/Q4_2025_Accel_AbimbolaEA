@@ -1,5 +1,5 @@
-use anchor_lang::prelude::*;
 use anchor_lang::system_program::{create_account, CreateAccount};
+use anchor_lang::prelude::*;
 use anchor_spl::token_2022::{
     initialize_mint2,
     spl_token_2022::{
@@ -19,8 +19,8 @@ use anchor_spl::{
     token_interface::{Mint, TokenInterface, TransferFeeInitialize},
 };
 
-use crate::state::Vault;
 use crate::constants::SILICON_ID;
+use crate::state::Vault;
 
 #[derive(Accounts)]
 pub struct Initialize<'info> {
