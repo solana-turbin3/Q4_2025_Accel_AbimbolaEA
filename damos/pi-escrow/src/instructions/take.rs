@@ -1,14 +1,11 @@
 use pinocchio::{
     account_info::AccountInfo, instruction::{Seed, Signer},
     msg,
-    pubkey::log,
-    sysvars::{rent::Rent, Sysvar}, ProgramResult,
+    pubkey::log, ProgramResult,
 };
 
 use pinocchio_pubkey::derive_address;
-use pinocchio_system::instructions::CreateAccount;
 
-use crate::state::Escrow;
 
 pub fn process_take_instruction(accounts: &[AccountInfo], data: &[u8]) -> ProgramResult {
     msg!("Processing the Take Instruction");
@@ -37,7 +34,7 @@ pub fn process_take_instruction(accounts: &[AccountInfo], data: &[u8]) -> Progra
     
     let bump = data[1];
     let seed = [b"escrow".as_ref(), taker.key().as_slice(), &[bump]];
-    let seeds = &seed[..];
+    // let seeds = &seed[..];
 
     let escrow_account_pda = derive_address(&seed, None, &crate::ID);
     log(&escrow_account_pda);
@@ -62,7 +59,7 @@ pub fn process_take_instruction(accounts: &[AccountInfo], data: &[u8]) -> Progra
         authority: escrow_account,
         amount: amount_to_receive,
         decimals: 9,
-        token_program: token_program
+        token_program: token_program.key()
     }
     .invoke()?;
 

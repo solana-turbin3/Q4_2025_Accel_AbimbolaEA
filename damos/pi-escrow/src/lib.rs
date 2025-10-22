@@ -1,9 +1,13 @@
+#[cfg(target_os = "linux")]
 use crate::instructions::EscrowInstructions;
 use pinocchio::{ProgramResult, account_info::AccountInfo, entrypoint, pubkey::Pubkey};
 mod instructions;
 mod state;
 mod tests;
+
 // Writing the Escrow in just a file. Wish me well.
+// 0xdev didn't do that again +++++++++++++++++
+// Got too complex... had to pull out ASAP!
 
 entrypoint!(process_instruction);
 
