@@ -1,0 +1,22 @@
+# Rust
+target/
+**/*.rs.bk
+*.pdb
+
+# Solana
+test-ledger/
+.anchor/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Keypairs (keep deploy keypair in version control for consistency)
+# *-keypair.json

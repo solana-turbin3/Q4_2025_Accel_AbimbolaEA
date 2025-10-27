@@ -1,11 +1,10 @@
 use anchor_lang::prelude::*;
-use anchor_spl::associated_token::create;
 use solana_gpt_oracle::{self, solana_gpt_oracle::create_llm_context, Counter};
 
 use crate::{constant::*, Agent, Whitelist, AGENT_DESC};
 
 #[derive(Accounts)]
-pub struct InitializeAgent<'info> {
+pub struct InitializeAgent <'info> {
     #[account(mut)]
     pub user: Signer<'info>,
 
@@ -34,7 +33,9 @@ pub struct InitializeAgent<'info> {
 }
 
 impl<'info> InitializeAgent<'info> {
-    pub fn initialize_agent(&mut self) -> Result<()> {
+    pub fn initialize_agent (
+        &mut self
+    ) -> Result<()> {
         self.agent.context = self.llm_context.key();
 
         // Context for the agentic tool
